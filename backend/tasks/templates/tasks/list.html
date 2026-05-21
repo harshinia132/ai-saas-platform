@@ -1,0 +1,130 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tasks - AI SaaS Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f7fb; }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: white;
+        }
+        
+        .logo { font-size: 24px; font-weight: bold; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .nav-item { padding: 12px 15px; margin: 5px 0; border-radius: 10px; transition: all 0.3s; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.2); }
+        .nav-item a { color: white; text-decoration: none; display: block; }
+        .user-info { position: fixed; bottom: 20px; left: 20px; color: white; font-size: 14px; }
+        
+        .main-content { margin-left: 260px; padding: 30px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        h1 { color: #333; }
+        
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .insight-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 15px; margin-bottom: 25px; }
+        
+        .tasks-table { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; font-weight: 600; color: #555; }
+        
+        .priority-high, .priority-urgent { color: #e74c3c; font-weight: bold; }
+        .priority-medium { color: #f39c12; font-weight: bold; }
+        .priority-low { color: #27ae60; font-weight: bold; }
+        
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; }
+        .status-todo { background: #f8f9fa; color: #6c757d; }
+        .status-in_progress { background: #cce5ff; color: #004085; }
+        .status-completed { background: #d4edda; color: #155724; }
+        
+        .btn-sm { padding: 5px 12px; border-radius: 5px; text-decoration: none; font-size: 12px; margin: 2px; display: inline-block; }
+        .btn-view { background: #667eea; color: white; }
+        .btn-edit { background: #ffc107; color: #333; }
+        .btn-delete { background: #dc3545; color: white; }
+        .btn-complete { background: #28a745; color: white; }
+        
+        .empty-state { text-align: center; padding: 60px; background: white; border-radius: 15px; }
+        .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">🚀 AI SaaS Platform</div>
+        <div class="nav-item"><a href="/projects/">📁 Projects</a></div>
+        <div class="nav-item active"><a href="/tasks/">✅ Tasks</a></div>
+        <div class="nav-item"><a href="/ai-dashboard/">🤖 AI Dashboard</a></div>
+        <div class="nav-item"><a href="/admin/">⚙️ Admin</a></div>
+        <div class="nav-item"><a href="/logout/">🚪 Logout</a></div>
+        <div class="user-info">👤 {{ request.user.email }}<br>🔑 Role: {{ request.user.role|title }}</div>
+    </div>
+    
+    <div class="main-content">
+        <div class="header">
+            <h1>✅ Tasks</h1>
+            {% if is_manager %}
+            <a href="{% url 'task_create' %}" class="btn-primary">+ Create New Task</a>
+            {% endif %}
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        
+        <div class="insight-card">
+            <strong>🤖 AI Insight:</strong> {{ insight }}
+        </div>
+        
+        <div class="tasks-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Project</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Assignee</th>
+                        <th>Due Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr>
+                        <td>{{ task.title }}</td>
+                        <td>{{ task.project.name }}</td>
+                        <td class="priority-{{ task.priority }}">{{ task.priority|upper }}</td>
+                        <td><span class="status-badge status-{{ task.status }}">{{ task.status|title }}</span></td>
+                        <td>{{ task.assignee.email|default:"Unassigned" }}</td>
+                        <td>{{ task.due_date|default:"No date" }}</td>
+                        <td>
+                            <a href="{% url 'task_detail' task.id %}" class="btn-sm btn-view">View</a>
+                            {% if is_manager %}
+                            <a href="{% url 'task_edit' task.id %}" class="btn-sm btn-edit">Edit</a>
+                            <a href="{% url 'task_delete' task.id %}" class="btn-sm btn-delete">Delete</a>
+                            {% endif %}
+                            {% if task.status != 'completed' %}
+                            <a href="{% url 'task_complete' task.id %}" class="btn-sm btn-complete">Complete</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px;">No tasks yet. Create your first task!</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Details</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f7fb; }
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: white;
+        }
+        .logo { font-size: 24px; font-weight: bold; margin-bottom: 40px; }
+        .nav-item { padding: 12px 15px; margin: 5px 0; border-radius: 10px; }
+        .nav-item:hover { background: rgba(255,255,255,0.2); }
+        .nav-item a { color: white; text-decoration: none; display: block; }
+        .main-content { margin-left: 260px; padding: 30px; }
+        .card { background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .btn { 
+            display: inline-block; 
+            padding: 10px 20px; 
+            background: #667eea; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-workflow { background: #28a745; }
+        .btn-back { background: #6c757d; }
+        .info-row { display: flex; margin-bottom: 15px; }
+        .info-label { width: 150px; font-weight: bold; color: #555; }
+        .info-value { color: #333; }
+        .status-badge { 
+            display: inline-block; 
+            padding: 5px 12px; 
+            border-radius: 20px; 
+            font-size: 12px; 
+            font-weight: bold;
+        }
+        .status-todo { background: #f8f9fa; color: #6c757d; }
+        .status-in_progress { background: #cce5ff; color: #004085; }
+        .status-completed { background: #d4edda; color: #155724; }
+        h1 { color: #333; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">🚀 AI SaaS Platform</div>
+        <div class="nav-item"><a href="/projects/">📁 Projects</a></div>
+        <div class="nav-item"><a href="/tasks/">✅ Tasks</a></div>
+        <div class="nav-item"><a href="/workflow/">🔄 Workflows</a></div>
+        <div class="nav-item"><a href="/ai-dashboard/">🤖 AI Dashboard</a></div>
+        <div class="nav-item"><a href="/admin/">⚙️ Admin</a></div>
+        <div class="nav-item"><a href="/logout/">🚪 Logout</a></div>
+    </div>
+    
+    <div class="main-content">
+        <h1>📋 {{ task.title }}</h1>
+        
+        <div class="card">
+            <h2>Task Information</h2>
+            <div class="info-row">
+                <div class="info-label">Status:</div>
+                <div class="info-value">
+                    <span class="status-badge status-{{ task.status }}">{{ task.status|title }}</span>
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Priority:</div>
+                <div class="info-value">{{ task.priority|upper }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Project:</div>
+                <div class="info-value">{{ task.project.name }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Assignee:</div>
+                <div class="info-value">{{ task.assignee.email|default:"Unassigned" }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Created By:</div>
+                <div class="info-value">{{ task.created_by.email }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Due Date:</div>
+                <div class="info-value">{{ task.due_date|default:"Not set" }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Description:</div>
+                <div class="info-value">{{ task.description|default:"No description" }}</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Actions</h2>
+            
+            {% if task.workflow_instance %}
+                <a href="/workflow/{{ task.workflow_instance.id }}/" class="btn">🔄 View Workflow Progress</a>
+            {% else %}
+                <a href="/workflow/start/{{ task.id }}/" class="btn btn-workflow">🚀 Start Workflow</a>
+            {% endif %}
+            
+            <a href="/tasks/" class="btn btn-back">← Back to Tasks</a>
+            
+            {% if is_manager %}
+                <a href="/admin/tasks/task/{{ task.id }}/change/" class="btn">✏️ Edit Task</a>
+            {% endif %}
+        </div>
+        
+        {% if task.ai_recommendations %}
+        <div class="card">
+            <h2>🤖 AI Recommendations</h2>
+            <p>{{ task.ai_recommendations }}</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

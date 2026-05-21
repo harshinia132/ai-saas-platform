@@ -1,0 +1,237 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ project.name }} - Project Details</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f5f7fb;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: white;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .nav-item {
+            padding: 12px 15px;
+            margin: 5px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .nav-item a {
+            color: white;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .user-info {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .main-content {
+            margin-left: 260px;
+            padding: 30px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #333;
+        }
+        
+        .btn-back {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+        
+        .btn-edit {
+            background: #ffc107;
+            color: #333;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-left: 10px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .info-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .info-label {
+            width: 150px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .info-value {
+            flex: 1;
+            color: #333;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-active { background: #d4edda; color: #155724; }
+        .status-planning { background: #fff3cd; color: #856404; }
+        .status-completed { background: #cce5ff; color: #004085; }
+        
+        .task-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .task-item:last-child {
+            border-bottom: none;
+        }
+        
+        .task-title {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .task-status {
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+        
+        .btn-add-task {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">🚀 AI SaaS Platform</div>
+        <div class="nav-item"><a href="/projects/">📁 Projects</a></div>
+        <div class="nav-item"><a href="/tasks/">✅ Tasks</a></div>
+        <div class="nav-item"><a href="/ai-dashboard/">🤖 AI Dashboard</a></div>
+        <div class="nav-item"><a href="/admin/">⚙️ Admin</a></div>
+        <div class="nav-item"><a href="/logout/">🚪 Logout</a></div>
+        <div class="user-info">
+            👤 {{ request.user.email }}<br>
+            🔑 Role: {{ request.user.role|title }}
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="header">
+            <h1>📁 {{ project.name }}</h1>
+            <div>
+                <a href="/projects/" class="btn-back">← Back to Projects</a>
+                {% if is_manager %}
+                <a href="/projects/{{ project.id }}/edit/" class="btn-edit">✏️ Edit Project</a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Project Details</h2>
+            <div class="info-row">
+                <div class="info-label">Project Name:</div>
+                <div class="info-value">{{ project.name }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Description:</div>
+                <div class="info-value">{{ project.description|default:"No description" }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Status:</div>
+                <div class="info-value">
+                    <span class="status status-{{ project.status }}">{{ project.status|title }}</span>
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Due Date:</div>
+                <div class="info-value">{{ project.due_date|default:"Not set" }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Created By:</div>
+                <div class="info-value">{{ project.created_by.email }}</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>📋 Tasks</h2>
+            {% if tasks %}
+                {% for task in tasks %}
+                <div class="task-item">
+                    <span class="task-title">{{ task.title }}</span>
+                    <span class="task-status status-{{ task.status }}">{{ task.status|title }}</span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: #999;">No tasks yet.</p>
+            {% endif %}
+            {% if is_manager %}
+            <a href="/admin/tasks/task/add/" class="btn-add-task">+ Add Task</a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

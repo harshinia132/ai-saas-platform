@@ -1,0 +1,255 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Workflow Builder</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f7fb; }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: white;
+            overflow-y: auto;
+        }
+        
+        .logo { font-size: 24px; font-weight: bold; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .nav-item { padding: 12px 15px; margin: 5px 0; border-radius: 10px; cursor: pointer; transition: all 0.3s; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.2); }
+        .nav-item a { color: white; text-decoration: none; display: block; }
+        
+        .main-content { margin-left: 260px; padding: 30px; }
+        h1 { color: #333; margin-bottom: 20px; }
+        
+        .workflow-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        
+        .workflow-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            min-width: 800px;
+        }
+        
+        .step-node {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 150px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .step-node:hover {
+            transform: scale(1.05);
+        }
+        
+        .step-node.completed {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+        
+        .step-node.current {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            box-shadow: 0 0 20px rgba(255,193,7,0.5);
+        }
+        
+        .step-node.pending {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+        
+        .arrow {
+            font-size: 24px;
+            margin: 0 10px;
+            color: #667eea;
+        }
+        
+        .step-info {
+            margin-top: 10px;
+            font-size: 11px;
+            opacity: 0.8;
+        }
+        
+        .analytics-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .bottleneck {
+            background: #dc3545;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        
+        .ai-suggestion {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+        
+        .btn-primary { background: #667eea; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: #333; }
+        
+        .timer {
+            font-family: monospace;
+            font-size: 14px;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .timeout-warning {
+            background: #ffc107;
+            color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .user-info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">🚀 AI SaaS Platform</div>
+        <div class="nav-item"><a href="/projects/">📁 Projects</a></div>
+        <div class="nav-item"><a href="/tasks/">✅ Tasks</a></div>
+        <div class="nav-item active"><a href="/workflow/">🔄 Workflows</a></div>
+        <div class="nav-item"><a href="/ai-dashboard/">🤖 AI Dashboard</a></div>
+        <div class="nav-item"><a href="/admin/">⚙️ Admin</a></div>
+        <div class="nav-item"><a href="/logout/">🚪 Logout</a></div>
+        <div class="user-info">
+            👤 {{ request.user.email }}<br>
+            🔑 Role: {{ request.user.role|title }}
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <h1>🎨 Visual Workflow Builder</h1>
+        
+        <div class="workflow-container">
+            <h2>Current Workflow: {{ workflow.name }}</h2>
+            <p>Task: {{ instance.task.title }}</p>
+            
+            <div class="workflow-visual">
+                {% for step in workflow.steps %}
+                    <div class="step-node 
+                        {% if step.id == instance.current_step_id %}current
+                        {% elif step.id in completed_step_ids %}completed
+                        {% else %}pending{% endif %}">
+                        <strong>{{ step.name }}</strong>
+                        <div class="step-info">
+                            Type: {{ step.type|title }}<br>
+                            {% if step.required_role %}Role: {{ step.required_role|title }}{% endif %}
+                        </div>
+                    </div>
+                    {% if not forloop.last %}
+                        <div class="arrow">→</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            
+            {% if instance %}
+            <div class="timer">
+                ⏰ Step started: {{ instance.step_started_at|timesince }} ago
+                {% if instance.timeout_at %}
+                    <br>⚠️ Timeout at: {{ instance.timeout_at|timeuntil }} remaining
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if bottleneck %}
+        <div class="analytics-card">
+            <h2>🔍 AI Bottleneck Detection</h2>
+            <div class="bottleneck">
+                <strong>⚠️ Bottleneck Detected!</strong><br>
+                Step "{{ bottleneck_step.name }}" is taking {{ bottleneck.avg_time|floatformat:1 }} hours on average.
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="analytics-card">
+            <h2>🤖 AI Smart Assignment</h2>
+            {% if suggested_assignee %}
+            <div class="ai-suggestion">
+                <strong>Recommended Assignee for "{{ current_step.name }}":</strong><br>
+                👤 {{ suggested_assignee.email }}<br>
+                📊 Current workload: {{ suggested_assignee.assigned_tasks.count }} tasks<br>
+                ✅ Match score: {{ match_score }}%
+            </div>
+            {% else %}
+            <p>No AI suggestion available yet.</p>
+            {% endif %}
+        </div>
+        
+        <div class="analytics-card">
+            <h2>📅 AI Deadline Prediction</h2>
+            {% if predicted_date %}
+            <div class="ai-suggestion">
+                <strong>Predicted Completion:</strong><br>
+                📅 {{ predicted_date|date:"Y-m-d H:i" }}<br>
+                🎯 Confidence: {{ confidence_score|floatformat:1 }}%<br>
+                ⏰ {{ predicted_date|timeuntil }} from now
+            </div>
+            {% else %}
+            <p>Start a workflow to get deadline predictions.</p>
+            {% endif %}
+        </div>
+        
+        {% if can_act and instance.status != 'completed' %}
+        <div class="analytics-card">
+            <h2>Actions</h2>
+            <form method="post">
+                {% csrf_token %}
+                <textarea name="comments" placeholder="Add comments..." style="width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid #e0e0e0; border-radius: 8px;"></textarea>
+                <button type="submit" name="action" value="approve" class="btn btn-success">✅ Approve & Continue</button>
+                <button type="submit" name="action" value="reject" class="btn btn-warning">❌ Reject</button>
+            </form>
+        </div>
+        {% endif %}
+        
+        <div>
+            <a href="/workflow/" class="btn btn-primary">← Back to Workflows</a>
+            <a href="/tasks/{{ instance.task.id }}/" class="btn">📋 View Task</a>
+        </div>
+    </div>
+</body>
+</html>

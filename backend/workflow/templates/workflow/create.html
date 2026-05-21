@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Workflow</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f7fb; }
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: white;
+        }
+        .logo { font-size: 24px; font-weight: bold; margin-bottom: 40px; }
+        .nav-item { padding: 12px 15px; margin: 5px 0; border-radius: 10px; }
+        .nav-item:hover { background: rgba(255,255,255,0.2); }
+        .nav-item a { color: white; text-decoration: none; display: block; }
+        .main-content { margin-left: 260px; padding: 30px; }
+        .container { max-width: 600px; background: white; padding: 30px; border-radius: 15px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; }
+        input, textarea, select { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; }
+        button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; }
+        .btn-back { background: #6c757d; text-decoration: none; padding: 12px 24px; border-radius: 8px; color: white; display: inline-block; margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">🚀 AI SaaS Platform</div>
+        <div class="nav-item"><a href="/projects/">📁 Projects</a></div>
+        <div class="nav-item"><a href="/tasks/">✅ Tasks</a></div>
+        <div class="nav-item"><a href="/workflow/">🔄 Workflows</a></div>
+        <div class="nav-item"><a href="/ai-dashboard/">🤖 AI Dashboard</a></div>
+        <div class="nav-item"><a href="/logout/">🚪 Logout</a></div>
+    </div>
+    
+    <div class="main-content">
+        <div class="container">
+            <h1>Create New Workflow</h1>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Workflow Name</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Workflow Type</label>
+                    <select name="workflow_type">
+                        <option value="task">Task Workflow</option>
+                        <option value="project">Project Workflow</option>
+                        <option value="approval">Approval Workflow</option>
+                    </select>
+                </div>
+                <a href="/workflow/" class="btn-back">Cancel</a>
+                <button type="submit">Create Workflow</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
