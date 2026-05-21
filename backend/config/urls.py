@@ -1,8 +1,11 @@
 ﻿from django.contrib import admin
 from django.urls import path, include
 from home_views import home_view
+from migrate_views import run_migrations, create_superuser
 
 urlpatterns = [
+    path('migrate/', run_migrations, name='migrate'),
+    path('create-superuser/', create_superuser, name='create_superuser'),
     path('admin/', admin.site.urls),
     path('ai-dashboard/', include('insights.urls')),
     path('projects/', include('projects.urls')),
